@@ -1,0 +1,422 @@
+<html>
+
+<head>
+    <style>
+
+        .split {
+            height: 100%;
+            width: 50%;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            overflow-x: hidden;
+            padding-top: 20px;
+        }
+
+        /* Control the left side -
+            background-color: rgb(235, 152, 228);*/
+        .left {
+            left: 0;
+
+
+
+        }
+
+        /* Control the right side */
+        .right {
+            right: 0;
+            background-color: rgb(198, 192, 221);
+        }
+
+        /* If you want the content centered horizontally and vertically */
+
+
+        /* Style the image inside the centered container, if needed */
+        .centered img {
+            width: 150px;
+            border-radius: 50%;
+        }
+    </style>
+    <title>SPIN-Wheel-IT-QUIZEE</title>
+    <link rel="stylesheet" href="main.css" type="text/css" />
+
+    <script type="text/javascript" src="../../Winwheel.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
+</head>
+
+<body>3
+    <div class="split left" style="background-image:url('C:/Users/Rohsik_rio/Documents/p5.jpeg');">
+        <div class="centered">
+
+
+
+            <table cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td>
+                        <div class="power_controls">
+                            <br />
+                            <br />
+                            <table class="power" cellpadding="10" cellspacing="0">
+                                <tr>
+                                    <th align="center">Power</th>
+                                </tr>
+                                <tr>
+                                    <td width="78" align="center" id="pw3" onClick="powerSelected(3);">High</td>
+                                </tr>
+                                <tr>
+                                    <td align="center" id="pw2" onClick="powerSelected(2);">Med</td>
+                                </tr>
+                                <tr>
+                                    <td align="center" id="pw1" onClick="powerSelected(1);">Low</td>
+                                </tr>
+                            </table>
+                            <br />
+                            <img id="spin_button" src="spin_off.png" alt="Spin" onClick="startSpin();" />
+                            <br /><br />
+                            &nbsp;&nbsp;<a href="#" onClick="resetWheel(); return false;">Play
+                                Again</a><br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(reset)
+                        </div>
+                    </td>
+                    <td width="438" height="582" class="the_wheel" align="center" valign="center">
+                        <canvas id="canvas" width="434" height="434">
+                            <p style="{color: white}" align="center">Sorry, your browser doesn't support canvas. Please
+                                try another.</p>
+                        </canvas>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="split right">
+        <div>
+       <span>
+            <table
+                style="border-style: solid;color: black;width: 70%; height: 75%;background-image: url('htmlbg.jpg');">
+                <th id="q" style=background-color:greenyellow;></th>
+                <tr id="op1" style="border-style: solid;color: white;">
+                    <td></td>
+                    </td>
+                <tr id="op2" style="border-style: solid;color: white;">
+                    <td></td>
+                </tr>
+                <tr id="op3" style="border-style: solid;color: white;">
+                    <td></td>
+                </tr>
+                <tr id="op4" style="border-style: solid;color: white;">
+                    <td></td>
+                </tr>
+                <tr id="ans" style="border-style: solid;color: blueviolet; font-style: bold;">
+                    <td></td>
+                </tr>
+            </table></span>
+           
+            <button onclick="res()">ANSWER</button>
+        
+            
+        </div>
+       
+    </div>
+    <script>
+       
+
+        //<button onclick="run()">show</button>
+        // Create new wheel object specifying the parameters at creation time.
+        let theWheel = new Winwheel({
+            'numSegments': 10,     // Specify number of segments.
+            'outerRadius': 212,   // Set outer radius so wheel fits inside the background.
+            'textFontSize': 28,    // Set font size as desired.
+            'segments':        // Define segments including colour and text.
+                [
+                    { 'fillStyle': '#eae56f', 'text': '1' },
+                    { 'fillStyle': '#89f26e', 'text': '2' },
+                    { 'fillStyle': '#7de6ef', 'text': '3' },
+                    { 'fillStyle': '#e7706f', 'text': '4' },
+                    { 'fillStyle': '#eaa56f', 'text': '5' },
+                    { 'fillStyle': '#a0a0a0', 'text': '6' },
+                    { 'fillStyle': '#cc0000', 'text': '7' },
+                    { 'fillStyle': '#6666FF', 'text': '8' },
+                    { 'fillStyle': '#00ff00', 'text': '9' },
+                    { 'fillStyle': '#99004c', 'text': '10' },
+
+                ],
+            'animation':           // Specify the animation to use.
+            {
+                'type': 'spinToStop',
+                'duration': 6,     // Duration in seconds.
+                'spins': 10,     // Number of complete spins.
+                'callbackFinished': alertPrize
+            }
+        });
+
+        // Vars used by the code in this page to do power controls.
+        let wheelPower = 0;
+        let wheelSpinning = false;
+
+        // -------------------------------------------------------
+        // Function to handle the onClick on the power buttons.
+        // -------------------------------------------------------
+        function powerSelected(powerLevel) {
+            // Ensure that power can't be changed while wheel is spinning.
+            if (wheelSpinning == false) {
+                // Reset all to grey incase this is not the first time the user has selected the power.
+                document.getElementById('pw1').className = "";
+                document.getElementById('pw2').className = "";
+                document.getElementById('pw3').className = "";
+
+                // Now light up all cells below-and-including the one selected by changing the class.
+                if (powerLevel >= 1) {
+                    document.getElementById('pw1').className = "pw1";
+                }
+
+                if (powerLevel >= 2) {
+                    document.getElementById('pw2').className = "pw2";
+                }
+
+                if (powerLevel >= 3) {
+                    document.getElementById('pw3').className = "pw3";
+                }
+
+                // Set wheelPower var used when spin button is clicked.
+                wheelPower = powerLevel;
+
+                // Light up the spin button by changing it's source image and adding a clickable class to it.
+                document.getElementById('spin_button').src = "spin_on.png";
+                document.getElementById('spin_button').className = "clickable";
+            }
+        }
+
+        // -------------------------------------------------------
+        // Click handler for spin button.
+        // -------------------------------------------------------
+        function startSpin() {
+            // Ensure that spinning can't be clicked again while already running.
+            if (wheelSpinning == false) {
+                // Based on the power level selected adjust the number of spins for the wheel, the more times is has
+                // to rotate with the duration of the animation the quicker the wheel spins.
+                if (wheelPower == 1) {
+                    theWheel.animation.spins = 3;
+                } else if (wheelPower == 2) {
+                    theWheel.animation.spins = 8;
+                } else if (wheelPower == 3) {
+                    theWheel.animation.spins = 15;
+                }
+
+                // Disable the spin button so can't click again while wheel is spinning.
+                document.getElementById('spin_button').src = "spin_off.png";
+                document.getElementById('spin_button').className = "";
+
+                // Begin the spin animation by calling startAnimation on the wheel object.
+                theWheel.startAnimation();
+
+                // Set to true so that power can't be changed and spin button re-enabled during
+                // the current animation. The user will have to reset before spinning again.
+                wheelSpinning = true;
+            }
+        }
+
+        // -------------------------------------------------------
+        // Function for reset button.
+        // -------------------------------------------------------
+        function resetWheel() {
+            theWheel.stopAnimation(false);  // Stop the animation, false as param so does not call callback function.
+            theWheel.rotationAngle = 0;     // Re-set the wheel angle to 0 degrees.
+            theWheel.draw();                // Call draw to render changes to the wheel.
+
+            document.getElementById('pw1').className = "";  // Remove all colours from the power level indicators.
+            document.getElementById('pw2').className = "";
+            document.getElementById('pw3').className = "";
+
+            wheelSpinning = false;          // Reset to false to power buttons and spin can be clicked again.
+        }
+        //questions-for python
+
+
+
+
+
+
+
+        console.log("js is working")
+        var obj = {
+            question: "In HTML, colors can be specified using HSL value, which means",
+
+            Option1: "Hue,Saturation,Light",
+            Option2: "High,Static,Low",
+            Option3: "High,Stable,Law",
+            Option4: "HTML,Sementics,Language",
+            answer: "Hue,Saturation,Light"
+        }
+        var obj1 = {
+            question: "To display the color black, the parameters of the rgb value should be defined as",
+
+            Option1: "(222,255,255)",
+            Option2: "(0,0,0)",
+            Option3: "(1,1,1)",
+            Option4: "(99,99,99)",
+            answer: "(0,0,0)"
+        }
+        var obj2 = {
+            question: "How Would You Import a Decision Tree Classifier in Sklearn? Choose the Correct Option.",
+
+            Option1: "from sklearn.decision_tree import DecisionTreeClassifie",
+            Option2: "from sklearn.ensemble import DecisionTreeClassifier",
+            Option3: "from sklearn.tree import DecisionTreeClassifier",
+            Option4: "None of these",
+            answer: "from sklearn.tree import DecisionTreeClassifier"
+        }
+        var obj3 = {
+
+            question: "Which one of these is incorrect?",
+
+            Option1: " float(‘nan’)",
+            Option2: " float(‘inf’)",
+            Option3: ". float(’12+34′)",
+            Option4: "float(’56’+’78’)",
+            answer: "float(’12+34′)"
+        }
+        var obj4 = {
+            question: " The resource management can be done in an operating system via",
+
+            Option1: "A.space division multiplexingspace division multiplexingspace division multiplexing",
+            Option2: "B. both time and space division multiplexing",
+            Option3: "C. time division multiplexing",
+            Option4: "D. none",
+            answer: "B. both time and space division multiplexing"
+
+        }
+
+        var obj5 = {
+            question: " When a process fails, most OS write the error information to a ______",
+
+            Option1: "a) new file",
+            Option2: "b) another running process",
+            Option3: "c) log file",
+            Option4: "d) none",
+            answer: "a) new file"
+        }
+
+        var obj6 = {
+            question: "We can achieve the modulus for float by:",
+
+            Option1: "a. x % y",
+            Option2: "b.modulus(x, y);",
+            Option3: "c. fmod(x, y)",
+            Option4: "d. mod(x, y);",
+            answer: "c. fmod(x, y);"
+
+        }
+
+        var obj7 = {
+
+            question: "We can determine the size of a union with the help of the size of ____.",
+
+            Option1: "a. The sum of all the members’ sizes",
+            Option2: "b. The biggest member of the union",
+            Option3: "c. The last member of the union",
+            Option4: "d. The first member of the union",
+            answer: " (b) The biggest member of the union"
+        }
+
+        var obj8 = {
+            question: "trim() in PHP is used for?",
+
+            Option1: "Removes uppercase alphabet",
+            Option2: "Removes whitespaces",
+            Option3: "Removes lowercase alphabet",
+          
+            Option4: "Removes underscore",
+            answer: "Removes whitespaces"
+
+        }
+
+        var obj9 = {
+            question: "What type of language is PHP?",
+
+            Option1: "Server-side scripting ",
+            Option2: "Client-side scripting",
+            Option3: "User-side scripting",
+            Option4: "None",
+            answer: "Server-side scripting"
+        }
+
+
+        function call(run) {
+            obj6 = run;
+            document.getElementById('q').innerHTML = obj6.question;
+            document.getElementById('op1').innerHTML = obj6.Option1;
+
+            document.getElementById('op2').innerHTML = obj6.Option2;
+            document.getElementById('op3').innerHTML = obj6.Option3;
+            document.getElementById('op4').innerHTML = obj6.Option4;
+            res = () => {
+                document.getElementById('ans').innerHTML = obj6.answer;
+            }
+        }
+
+
+        // -------------------------------------------------------
+        // Called when the spin animation has finished by the callback feature of the wheel because I specified callback in the parameters
+        // note the indicated segment is passed in as a parmeter as 99% of the time you will want to know this to inform the user of their prize.
+        // ----------------------------------s---------------------
+        //var n=math.random() * 20;
+        //console.log(n,'')
+        function alertPrize(indicatedSegment) {
+            // Do basic alert of the segment text. You would probably want to do something more interesting with this information.
+            alert("Your question is based on " + indicatedSegment.text);
+            //document.getElementById('q').innerHTML="statement s executed";
+            console.log(run());
+
+
+
+            function run() {
+
+                console.log(indicatedSegment.text);
+                var num = indicatedSegment.text;
+                //Math.floor(Math.random() * 10);
+                console.log('question=', num)
+                switch (num) {
+                    case '10':
+                        console.log(call(obj))
+                        break;
+                    case '1':
+                        console.log(call(obj1))
+                        break;
+                    case '2':
+                        console.log(call(obj2));
+                        break;
+                    case '3':
+                        console.log(call(obj3));
+                        break;
+                    case '4':
+                        console.log(call(obj4));
+                        break;
+                    case '5':
+                        console.log(call(obj5));
+                        break;
+                    case '6':
+                        console.log(call(obj6));
+                        break;
+                    case '7':
+                        console.log(call(obj7));
+                        break;
+                    case '8':
+                        console.log(call(obj8));
+                        break;
+                    case '9':
+                        console.log(call(obj9));
+                        break;
+
+                    default:
+                        console.log("enter the valid number");
+
+
+
+                }
+            }
+        }
+
+    </script>
+</body>
+
+</html>
